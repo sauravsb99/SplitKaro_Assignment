@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+// Returns the Simplified Balance with the Name of the Group
 router.get('/', function(req, res, next) {
     for(let i=0;i<list_obj.length;i++){
         if(list_obj[i].name == req.body.name){

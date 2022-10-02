@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+// Creates a new Group
 router.post('/', function(req, res, next) {
     console.log('POST GroupCreation');
     var group = {}

@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
+// Add's members even if they are not present in the user list
 function addAllMembers(index){
     for(var i = 0 ; i < list_obj[index].items.length;i++){
         for(var j = 0 ; j < list_obj[index].items[i].paid_by.length;j++){
@@ -34,6 +35,7 @@ function addAllMembers(index){
     }
 }
 
+// Calculates the cashflow ie the money owed - money owes
 function calculateTotalBalance(index){
     var total_balance = {};
     for(var i = 0 ; i < list_obj[index].items.length;i++){
@@ -59,7 +61,7 @@ function calculateTotalBalance(index){
     
 }
 
-
+// Min Value 
 function getMin(total_balance)
 {
     var minInd = 10000000;
@@ -71,7 +73,8 @@ function getMin(total_balance)
         }       
     return key;
 }
-     
+
+// Max value
 function getMax(total_balance)
 {
     var minInd = -10000000;
@@ -84,38 +87,35 @@ function getMax(total_balance)
     return key;
 }
      
-    // A utility function to return minimum of 2 values
-    function minOf2(x , y)
-    {
-        return (x < y) ? x: y;
-    }
-     
-    function minCashFlowRec(index,total_balance)
-    {
-        var mxCredit = getMax(total_balance), mxDebit = getMin(total_balance);
-     
-        if (total_balance[mxCredit] == 0 && total_balance[mxDebit] == 0)
-            return;
-     
-        // Find the minimum of two amounts
-        var min = minOf2(-total_balance[mxDebit], total_balance[mxCredit]);
-        total_balance[mxCredit] -= min;
-        total_balance[mxDebit] += min;
-     
-        // If minimum is the maximum amount to be
-        console.log("Person " + mxDebit + " pays " + min
-                                + " to " + "Person " + mxCredit);
-        var tmp1={};
-        tmp1[mxCredit] = min;
-        var tmp2={};
-        tmp2[mxDebit] = min;
-        list_obj[index].balances[mxDebit].owes_to.push(tmp1);
-        list_obj[index].balances[mxCredit].owed_by.push(tmp2);
+// Minimum of 2 values
+function minOf2(x , y)
+{
+    return (x < y) ? x: y;
+}
 
-        minCashFlowRec(index,total_balance);
-    }
+// Function to find the simplified balance
+function minCashFlowRec(index,total_balance)
+{
+    var mxCredit = getMax(total_balance), mxDebit = getMin(total_balance);
+ 
+    if (total_balance[mxCredit] == 0 && total_balance[mxDebit] == 0)
+        return;
+ 
+    // Find the minimum of two amounts
+    var min = minOf2(-total_balance[mxDebit], total_balance[mxCredit]);
+    total_balance[mxCredit] -= min;
+    total_balance[mxDebit] += min;
 
+    var tmp1={};
+    tmp1[mxCredit] = min;
+    var tmp2={};
+    tmp2[mxDebit] = min;
+    list_obj[index].balances[mxDebit].owes_to.push(tmp1);
+    list_obj[index].balances[mxCredit].owed_by.push(tmp2);
+    minCashFlowRec(index,total_balance);
+}
 
+// Fill total_balances
 function fillTotalBalance(index,total_balance){
     for(var i in total_balance){
         var tmp = {};
@@ -138,10 +138,11 @@ function calculateExpense(index){
     console.log(list_obj[index]);
 }
 
+//Returns the balanced list 
 router.post('/', function(req, res, next) {
-    console.log(list_obj[0].name);
     for(let i=0;i<list_obj.length;i++){
         if(list_obj[i].name == req.body.name){
+            console.log(list_obj[i].name);
             list_obj[i].items = req.body.items;
             calculateExpense(i);
             res.send(list_obj[i]);
